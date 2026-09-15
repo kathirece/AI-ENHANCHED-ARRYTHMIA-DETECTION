@@ -1,6 +1,6 @@
 # AI-Enhanced Heart-Rate Classification on ESP32
 
-An educational TinyML prototype that measures photoplethysmography (PPG) pulse data with a MAX30100, calculates heart rate on an ESP32, and displays a heart-rate category on an SH1106 OLED. The accompanying Google Colab notebook prepares RR-interval-derived BPM data from the MIT-BIH Arrhythmia Database for an Edge Impulse workflow.
+An educational TinyML prototype that measures photoplethysmography (PPG) pulse data with a MAX30100, calculates heart rate on an ESP32, and displays a heart-rate category on an SH1106 OLED.
 
 > [!CAUTION]
 > This is a student prototype, not a medical device. It does **not** diagnose arrhythmia or replace an ECG, a clinician, or emergency care. The hardware measures optical pulse rate (PPG), while the MIT-BIH source data is ECG. Bradycardia/tachycardia thresholds are simplified educational categories and may not be appropriate for an individual.
@@ -22,12 +22,10 @@ An educational TinyML prototype that measures photoplethysmography (PPG) pulse d
 
 ```mermaid
 flowchart TD
-    A["MIT-BIH ECG annotations"] --> B["Colab: RR intervals to BPM"]
-    B --> C["Edge Impulse training"]
-    C --> D["Exported C++ library"]
-    E["MAX30100 PPG sensor"] --> F["ESP32 sample window"]
-    D --> F
-    F --> G["OLED and serial output"]
+    A["MAX30100 PPG sensor"] --> B["ESP32 BPM samples"]
+    C["Exported Edge Impulse library"] --> D["Heart-rate classification"]
+    B --> D
+    D --> E["OLED and serial output"]
 ```
 
 The training source and live sensor are different measurement modalities. A model trained only on RR-derived BPM can learn heart-rate categories, but it cannot identify the full range of ECG rhythm abnormalities or beat morphology.
@@ -51,8 +49,6 @@ Both I²C modules share the ESP32 bus: SDA on GPIO 21 and SCL on GPIO 22. See [t
 │   ├── lib/                   Place the exported Edge Impulse library here
 │   ├── platformio.ini
 │   └── src/main.cpp
-├── notebooks/
-│   └── mit_bih_rr_to_bpm.ipynb
 ├── data/                      Dataset format and generated-file guidance
 ├── docs/wiring.md
 ├── media/                     Muted demo and preview images
@@ -62,24 +58,13 @@ Both I²C modules share the ESP32 bus: SDA on GPIO 21 and SCL on GPIO 22. See [t
 
 ## Reproduce the project
 
-### 1. Prepare BPM data in Google Colab
+### 1. Install an Edge Impulse model
 
-Open [`notebooks/mit_bih_rr_to_bpm.ipynb`](notebooks/mit_bih_rr_to_bpm.ipynb) in Colab and run all cells. It uses the official `wfdb` Python package to read MIT-BIH beat annotations, derive RR intervals, convert them to BPM, apply explicit rate-category labels, and export both sample-level and 10-sample-window CSV files.
-
-The notebook intentionally calls this **heart-rate classification**. MIT-BIH contains richer rhythm and beat annotations, but reducing ECG to BPM discards the morphology needed for clinical arrhythmia recognition.
-
-### 2. Train and export the Edge Impulse model
-
-1. Create an Edge Impulse classification project.
-2. Import the generated dataset and retain the three labels: `Bradycardia`, `Normal`, and `Tachycardia`.
-3. Configure the model for a 10-value BPM input window, matching the notebook and firmware.
-4. Train and evaluate the model with record-aware splits so windows from the same patient record do not leak across training and test sets.
-5. Export the complete **Arduino library** or **C++ library** deployment package.
-6. Put the generated library files in `firmware/lib/arrhythmia_inferencing/` and follow its [model installation note](firmware/lib/arrhythmia_inferencing/README.md).
+If you already have a reviewed Edge Impulse model matching the firmware's BPM input, export the complete **Arduino library** or **C++ library** package. Put its generated files in `firmware/lib/arrhythmia_inferencing/` and follow the [model installation note](firmware/lib/arrhythmia_inferencing/README.md).
 
 Without that generated model, the firmware still compiles and displays the transparent BPM-range result; the model field reports `Not installed`.
 
-### 3. Build the firmware
+### 2. Build the firmware
 
 Install [PlatformIO](https://platformio.org/), connect the ESP32, then run:
 
@@ -120,7 +105,6 @@ See [`report_arrhythmia.pdf`](report_arrhythmia.pdf) for the submitted report an
 ## References
 
 - [MIT-BIH Arrhythmia Database — PhysioNet](https://physionet.org/content/mitdb/1.0.0/)
-- [WFDB Python package documentation](https://wfdb.readthedocs.io/en/latest/)
 - [Edge Impulse Arduino deployment documentation](https://docs.edgeimpulse.com/hardware/deployments/run-arduino-2-0)
 
 ## Project team

@@ -9,8 +9,6 @@ An educational TinyML prototype that measures photoplethysmography (PPG) pulse d
 
 [![ESP32, MAX30100 and OLED prototype](media/hardware-prototype.jpg)](media/arrhythmia-demo-enhanced.mp4)
 
-[Watch the muted, stabilized demo video](media/arrhythmia-demo-enhanced.mp4). The video was denoised and lightly sharpened within the detail available in the original recording; it was not AI-upscaled or given artificial detail.
-
 ![Serial monitor output from the prototype](media/serial-monitor.jpg)
 
 ## What the prototype does

@@ -1,0 +1,9 @@
+.pio/
+.vscode/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+notebooks/output/
+data/generated/
+.DS_Store
+
